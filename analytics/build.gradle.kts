@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+//    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -8,7 +9,6 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.rahulyadav.analytics"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -36,15 +36,26 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    
+    // WorkManager for background syncing
+    implementation(libs.androidx.work.runtime.ktx)
+    
+    // Network dependencies
+    implementation(libs.retrofit2)
+    implementation(libs.retrofit2.converter.gson)
+    implementation(libs.okhttp3)
+    implementation(libs.gson)
+
+    // Room database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+  //  kapt(libs.androidx.room.compiler)
+    
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    implementation("androidx.room:room-runtime:2.6.1")
-    // Retrofit with Gson converter
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
 }

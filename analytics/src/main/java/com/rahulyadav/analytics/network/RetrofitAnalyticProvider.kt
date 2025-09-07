@@ -5,13 +5,11 @@ import com.rahulyadav.analytics.analytics.AnalyticsProvider
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.concurrent.TimeUnit
 
 class RetrofitAnalyticProvider(
-private val endpoint: String,
-private val apiKey: String? = null
+    private val endpoint: String,
+    private val apiKey: String? = null
 ) : AnalyticsProvider {
 
     private val apiService: AnalyticsApiService by lazy { createApiService() }
@@ -21,9 +19,8 @@ private val apiKey: String? = null
             val authHeader = apiKey?.let { "Bearer $it" }
             val request = EventsBatchRequest(events = events)
 
-            val response = apiService.sendEventsBatch(
-                endpoint = "$baseUrl/analytics/events",
-                authHeader = authHeader,
+            val response = apiService.sendEvents(
+                authorization = authHeader,
                 request = request
             )
 
@@ -57,12 +54,10 @@ private val apiKey: String? = null
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("djfhjk")
+            .baseUrl(endpoint)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(AnalyticsApiService::class.java)
     }
-}
-
 }

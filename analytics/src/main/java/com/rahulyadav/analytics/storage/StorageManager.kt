@@ -6,8 +6,6 @@ interface StorageManager {
     suspend fun persistEvents(events: List<AnalyticsEvent>)
     suspend fun loadPersistedEvents(): List<AnalyticsEvent>
     suspend fun clearPersistedEvents()
-    fun saveUserProperty(property: UserProperty)
-    fun saveUserId(userId: String)
-
-
+    suspend fun getPendingEvents(): List<AnalyticsEvent>
+    suspend fun removeEvents(eventIds: List<String>)
 }

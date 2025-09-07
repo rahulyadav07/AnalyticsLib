@@ -1,7 +1,6 @@
 package com.rahulyadav.analytics.storage
 
 import android.content.Context
-import android.preference.PreferenceManager
 import androidx.room.Room
 import com.rahulyadav.analytics.analytics.AnalyticsEvent
 
@@ -25,14 +24,12 @@ class StorageManagerImp(val context: Context):StorageManager {
         database.eventsDao().deleteAll()
     }
 
-    override fun saveUserProperty(property: UserProperty) {
-        database.userPropertiesDao().insert(property.toEntity())
+
+    override suspend fun getPendingEvents(): List<AnalyticsEvent> {
+        return database.eventsDao().getPendingEvents().map { it.toAnalyticsEvent() }
     }
 
-    override fun saveUserId(userId: String) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .edit()
-            .putString("user_id", userId)
-            .apply()
+    override suspend fun removeEvents(eventIds: List<String>) {
+        database.eventsDao().deleteByIds(eventIds)
     }
 }

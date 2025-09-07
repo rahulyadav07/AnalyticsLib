@@ -22,6 +22,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Analytics Initialization Provider -->
+        <provider
+            android:name="com.rahulyadav.analytics.AnalyticsInitProvider"
+            android:authorities="${applicationId}.analytics.init"
+            android:exported="false" />
     </application>
 
 </manifest>

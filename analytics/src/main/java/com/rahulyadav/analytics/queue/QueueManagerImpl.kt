@@ -1,9 +1,12 @@
 package com.rahulyadav.analytics.queue
 
 import android.content.Context
-import android.os.storage.StorageManager
 import com.rahulyadav.analytics.analytics.AnalyticsConfig
 import com.rahulyadav.analytics.analytics.AnalyticsEvent
+import com.rahulyadav.analytics.storage.StorageManager
+import com.rahulyadav.analytics.storage.StorageManagerImp
+import com.rahulyadav.analytics.network.NetworkManager
+import com.rahulyadav.analytics.network.NetworkManagerImp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,8 +21,8 @@ class QueueManagerImpl(private val context: Context,
 
     private val eventQueue = ConcurrentLinkedQueue<AnalyticsEvent>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val storageManager: StorageManager = StorageManagerImpl(context)
-    private val networkManager: NetworkManager = NetworkManagerImpl(config)
+    private val storageManager: StorageManager = StorageManagerImp(context)
+    private val networkManager: NetworkManager = NetworkManagerImp(config)
     init {
         startBatchProcessor()
         loadPersistedEvents()
@@ -32,6 +35,12 @@ class QueueManagerImpl(private val context: Context,
         }
         eventQueue.offer(event)
 
+        // Store event locally first
+        coroutineScope.launch {
+            storageManager.persistEvents(listOf(event))
+        }
+
+        // If batch size is reached, send immediately via API (app is running)
         if (eventQueue.size >= config.batchSize!!) {
             flush()
         }
@@ -46,9 +55,18 @@ class QueueManagerImpl(private val context: Context,
 
             if (events.isNotEmpty()) {
                 try {
-                    networkManager.sendEvents(events)
+                    // Try to send via network immediately (app is running)
+                    val success = networkManager.sendEvents(events)
+                    if (success) {
+                        // Remove successfully sent events from local storage
+                        storageManager.removeEvents(events.map { it.id })
+                    } else {
+                        // If failed, events are already stored locally, WorkManager will handle retry
+                        println("Failed to send events immediately, WorkManager will retry")
+                    }
                 } catch (e: Exception) {
-                    storageManager.persistEvents(events)
+                    // Events are already stored locally, WorkManager will handle retry
+                    println("Exception sending events immediately: ${e.message}, WorkManager will retry")
                 }
             }
         }
@@ -57,7 +75,7 @@ class QueueManagerImpl(private val context: Context,
     private fun startBatchProcessor() {
         coroutineScope.launch {
             while (isActive) {
-                delay(config.batchIntervalMs)
+                delay(config.batchTimeInterval)
                 flush()
             }
         }
