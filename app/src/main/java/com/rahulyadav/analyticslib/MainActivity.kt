@@ -20,8 +20,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         
-        // Analytics is auto-initialized via ContentProvider, just set the API key
-        AnalyticImp.init("your-api-key-here")
+        // Analytics is fully auto-initialized via ContentProvider - no setup needed!
         
         setContent {
             AnalyticsLibTheme {

@@ -3,15 +3,13 @@ package com.rahulyadav.analytics.queue
 import android.content.Context
 import com.rahulyadav.analytics.analytics.AnalyticsConfig
 import com.rahulyadav.analytics.analytics.AnalyticsEvent
-import com.rahulyadav.analytics.storage.StorageManager
-import com.rahulyadav.analytics.storage.StorageManagerImp
 import com.rahulyadav.analytics.network.NetworkManager
 import com.rahulyadav.analytics.network.NetworkManagerImp
+import com.rahulyadav.analytics.storage.StorageManager
+import com.rahulyadav.analytics.storage.StorageManagerImp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -23,10 +21,7 @@ class QueueManagerImpl(private val context: Context,
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val storageManager: StorageManager = StorageManagerImp(context)
     private val networkManager: NetworkManager = NetworkManagerImp(config)
-    init {
-        startBatchProcessor()
-        loadPersistedEvents()
-    }
+
 
 
     override fun enqueue(event: AnalyticsEvent) {
@@ -69,23 +64,6 @@ class QueueManagerImpl(private val context: Context,
                     println("Exception sending events immediately: ${e.message}, WorkManager will retry")
                 }
             }
-        }
-    }
-
-    private fun startBatchProcessor() {
-        coroutineScope.launch {
-            while (isActive) {
-                delay(config.batchTimeInterval)
-                flush()
-            }
-        }
-    }
-
-    private fun loadPersistedEvents() {
-        coroutineScope.launch {
-            val persistedEvents = storageManager.loadPersistedEvents()
-            persistedEvents.forEach { enqueue(it) }
-            storageManager.clearPersistedEvents()
         }
     }
 }

@@ -14,14 +14,9 @@ class AnalyticsWorkManager(private val context: Context) {
         private const val MIN_BACKOFF_MILLIS = 10000L // 10 seconds
     }
 
-    fun scheduleImmediateSync(endpoint: String? = null, apiKey: String? = null) {
-        val inputData = Data.Builder()
-            .putString("endpoint", endpoint)
-            .putString("apiKey", apiKey)
-            .build()
-
+    fun scheduleImmediateSync() {
+        // No need to pass endpoint/apiKey - they are hardcoded in RetrofitAnalyticProvider
         val syncRequest = OneTimeWorkRequestBuilder<AnalyticsSyncWorker>()
-            .setInputData(inputData)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -41,16 +36,11 @@ class AnalyticsWorkManager(private val context: Context) {
         )
     }
 
-    fun schedulePeriodicSync(intervalMinutes: Long = 15, endpoint: String? = null, apiKey: String? = null) {
-        val inputData = Data.Builder()
-            .putString("endpoint", endpoint)
-            .putString("apiKey", apiKey)
-            .build()
-
+    fun schedulePeriodicSync(intervalMinutes: Long = 15) {
+        // No need to pass endpoint/apiKey - they are hardcoded in RetrofitAnalyticProvider
         val periodicSyncRequest = PeriodicWorkRequestBuilder<AnalyticsSyncWorker>(
             intervalMinutes, TimeUnit.MINUTES
         )
-            .setInputData(inputData)
             .setConstraints(
                 Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)

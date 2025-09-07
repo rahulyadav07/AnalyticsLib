@@ -17,6 +17,7 @@ A comprehensive Android analytics library with WorkManager integration for relia
 - **Network Layer**: Retrofit-based API communication
 - **Auto-Initialization**: Library initializes automatically via ContentProvider
 - **Simple API**: Static methods - no need to call getInstance() every time
+- **Efficient Network**: Device info sent in headers, not with each event
 - **Configurable**: Flexible configuration for batch sizes, retry attempts, and more
 
 ## Setup
@@ -29,13 +30,13 @@ The library includes all necessary dependencies:
 - Retrofit for network communication
 - Gson for JSON serialization
 
-### 2. Auto-Initialization
+### 2. Fully Automatic Initialization
 
-The library automatically initializes via ContentProvider when your app starts. Just set your API key:
+The library automatically initializes everything via ContentProvider when your app starts. No setup required!
 
 ```kotlin
-// In your MainActivity or Application class
-AnalyticImp.init("your-api-key")
+// No initialization needed - everything is automatic!
+// Just start logging events immediately
 ```
 
 ### 3. ContentProvider Registration
@@ -52,11 +53,8 @@ The ContentProvider is already configured in the library and will initialize ana
 
 #### Simple API Usage:
 ```kotlin
-// Old way (verbose)
-AnalyticImp.getInstance().logEvent("button_clicked")
-
-// New way (clean and simple)
-AnalyticImp.logEvent("button_clicked")
+// Just log events - no initialization needed!
+AnalyticImp.logEvent("button_clicked", mapOf("source" to "main_screen"))
 ```
 
 ## Usage
@@ -154,15 +152,38 @@ AnalyticImp.logEvent(
 3. **Immediate Sync**: When app is running and batch is full
 4. **Background Sync**: WorkManager handles failed/queued events
 5. **No Data Loss**: Events always stored locally first
+6. **Efficient Processing**: No redundant background processes or memory loading
+7. **Smart Recovery**: Automatically syncs existing data when app starts
+
+### Smart Recovery System
+
+The library automatically handles existing data when the app starts:
+
+**Scenario**: App was closed with pending events in database
+**Solution**: Dual WorkManager approach
+
+```kotlin
+// When app starts, library automatically:
+1. Schedules periodic WorkManager (every 15 minutes)
+2. Triggers immediate WorkManager sync
+3. Ensures data is sent as soon as possible
+4. No waiting for periodic schedule
+```
 
 ### WorkManager Integration
 
-The library uses WorkManager for reliable background syncing when the app is not running:
+The library uses a dual WorkManager approach for maximum reliability:
 
 - **Periodic Sync**: Automatically syncs events every 15 minutes (configurable)
+- **Immediate Sync**: Triggers sync immediately when app starts
 - **Network Constraints**: Only syncs when network is available
 - **Retry Logic**: Exponential backoff for failed syncs
 - **Battery Optimization**: Respects battery optimization settings
+
+**Benefits of Dual Approach:**
+- **No Waiting**: Immediate sync on app start
+- **Backup Safety**: Periodic sync as fallback
+- **Maximum Reliability**: Two sync mechanisms
 - **Fallback Only**: WorkManager only handles events when app is not running
 
 ## Configuration Options
@@ -179,8 +200,24 @@ AnalyticsConfig(
 
 ## API Integration
 
-The library expects your API to accept events in the following format:
+The library uses hardcoded configuration for simplicity and security:
 
+**Hardcoded Configuration:**
+- **Endpoint**: `https://api.analytics.rahulyadav.com/`
+- **API Key**: `rahul_analytics_key_2024_secure_token`
+
+**Request Headers:**
+```
+Authorization: Bearer rahul_analytics_key_2024_secure_token
+X-Analytics-SDK: RahulAnalytics
+X-SDK-Version: 1.0.0
+X-Device-Version: Android 13
+X-Device-Model: Pixel 7
+X-Device-Manufacturer: Google
+X-Device-OS-Version: 33
+```
+
+**Request Body:**
 ```json
 {
   "events": [
@@ -191,13 +228,8 @@ The library expects your API to accept events in the following format:
         "key": "value"
       },
       "timestamp": 1234567890,
-        "sessionId": null,
-        "userId": null,
-      "deviceInfo": {
-        "version": "Android 13",
-        "model": "Pixel 7",
-        "manufacturer": "Google"
-      }
+      "sessionId": null,
+      "userId": null
     }
   ],
   "batchId": "batch_uuid",

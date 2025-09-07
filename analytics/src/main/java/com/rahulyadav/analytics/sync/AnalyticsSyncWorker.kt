@@ -44,10 +44,7 @@ class AnalyticsSyncWorker(
     }
 
     private fun createAnalyticsProvider(): AnalyticsProvider {
-        // Get endpoint and API key from input data or shared preferences
-        val endpoint = inputData.getString("endpoint") ?: "https://api.example.com"
-        val apiKey = inputData.getString("apiKey")
-        
-        return RetrofitAnalyticProvider(endpoint, apiKey)
+        // API key and endpoint are hardcoded in RetrofitAnalyticProvider
+        return RetrofitAnalyticProvider()
     }
 }

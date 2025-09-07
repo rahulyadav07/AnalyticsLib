@@ -4,20 +4,17 @@ import com.rahulyadav.analytics.ExponentialBackoffRetry
 import com.rahulyadav.analytics.analytics.AnalyticsConfig
 import com.rahulyadav.analytics.analytics.AnalyticsEvent
 
-class NetworkManagerImp(private val config:AnalyticsConfig):NetworkManager {
+class NetworkManagerImp(config:AnalyticsConfig):NetworkManager {
 
     private val retryPolicy = ExponentialBackoffRetry(config.maxRetryAttempts)
+    private val provider = RetrofitAnalyticProvider() // Single hardcoded provider
 
     override suspend fun sendEvents(events: List<AnalyticsEvent>): Boolean {
         return try {
-            var allSuccess = true
-            config.providers.forEach { provider ->
-                val success = provider.sendEvents(events)
-                if (!success) {
-                    allSuccess = false
-                }
+            // Use retry policy for the single provider
+            retryPolicy.execute {
+                provider.sendEvents(events)
             }
-            allSuccess
         } catch (e: Exception) {
             println("NetworkManager error: ${e.message}")
             false

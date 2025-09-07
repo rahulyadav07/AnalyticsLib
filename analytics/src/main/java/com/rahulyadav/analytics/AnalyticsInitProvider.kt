@@ -6,7 +6,6 @@ import android.database.Cursor
 import android.net.Uri
 import com.rahulyadav.analytics.analytics.AnalyticImp
 import com.rahulyadav.analytics.analytics.AnalyticsConfig
-import com.rahulyadav.analytics.network.RetrofitAnalyticProvider
 
 class AnalyticsInitProvider : ContentProvider() {
 
@@ -19,17 +18,9 @@ class AnalyticsInitProvider : ContentProvider() {
     private fun initializeAnalytics() {
         val config = AnalyticsConfig(
             batchSize = 10,
-            batchTimeInterval = 5 * 60 * 1000, // 5 minutes
-            maxQueueSize = 1000,
-            maxRetryAttempts = 3,
-            providers = listOf(
-                RetrofitAnalyticProvider(
-                    endpoint = "https://api.example.com",
-                    apiKey = null // Will be set later via init()
-                )
-            )
+            maxQueueSize = 10,
+            maxRetryAttempts = 2
         )
-        
         AnalyticImp.init(context!!, config)
     }
 

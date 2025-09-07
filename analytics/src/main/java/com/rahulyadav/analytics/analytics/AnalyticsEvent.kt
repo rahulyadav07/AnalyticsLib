@@ -5,9 +5,6 @@ data class AnalyticsEvent(
     val name: String,
     val params: Map<String, Any>?,
     val timestamp: Long = System.currentTimeMillis(),
-    val sessionId: String? = null, // No session management
-    val userId: String?,
-    val deviceInfo: DeviceInfo?
 )
 
 data class DeviceInfo(

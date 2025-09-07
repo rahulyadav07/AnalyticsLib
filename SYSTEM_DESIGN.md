@@ -16,11 +16,13 @@
 The Analytics Library is a comprehensive Android analytics solution that provides reliable event tracking with automatic background syncing. It's designed to work seamlessly whether the app is running or not, ensuring no data loss.
 
 ### Key Features
-- **Auto-Initialization**: ContentProvider-based initialization
+- **Fully Automatic**: ContentProvider-based initialization with dual WorkManager setup
+- **Hardcoded Configuration**: API key and endpoint built into the library
 - **Dual Sync Strategy**: Immediate sync when app is running, WorkManager when not
+- **Dual WorkManager**: Periodic + immediate sync for maximum reliability
 - **Offline Support**: Local storage with Room database
 - **Reliable Delivery**: Retry mechanisms and error handling
-- **Simple API**: Static methods for easy integration
+- **Zero Setup API**: Just log events - no initialization required
 
 ## 🏗️ Architecture
 
@@ -63,10 +65,12 @@ graph TD
     C --> D["Create AnalyticsConfig"]
     D --> E["AnalyticImp.init(context, config)"]
     E --> F["Initialize Components"]
-    F --> G["Analytics Ready"]
+    F --> G["Schedule Periodic WorkManager"]
+    G --> H["Trigger Immediate WorkManager"]
+    H --> I["Analytics Ready"]
     
-    H["MainActivity.onCreate()"] --> I["AnalyticImp.init('api-key')"]
-    I --> J["Start WorkManager Periodic Sync"]
+    J["MainActivity.onCreate()"] --> K["Just Log Events"]
+    K --> L["No Setup Required"]
 ```
 
 ### 2. Component Initialization Sequence
@@ -80,11 +84,16 @@ graph TD
    ├── QueueManager (event queuing)
    ├── StorageManager (Room database)
    ├── NetworkManager (API communication)
-   └── WorkManager (background sync)
+   └── WorkManager (background sync - auto-started)
 
-3. App Ready
-   └── User calls AnalyticImp.init("api-key")
-       └── Start periodic WorkManager sync
+3. Dual WorkManager Setup
+   ├── Schedule periodic sync (every 15 minutes)
+   ├── Trigger immediate sync on app start
+   ├── Set network and battery constraints
+   └── Ready for background processing
+
+4. App Ready
+   └── Just start logging events - no setup needed!
 ```
 
 ## 🧩 Component Roles
@@ -170,6 +179,35 @@ graph TD
   - AnalyticsEventEntity
   - AnalyticsEventDao
   - AnalyticsDatabase
+
+## 🔧 Hardcoded Configuration
+
+The library uses hardcoded configuration for simplicity and security:
+
+### **API Configuration**
+```kotlin
+// In RetrofitAnalyticProvider
+private val endpoint = "https://api.analytics.rahulyadav.com/"
+private val apiKey = "rahul_analytics_key_2024_secure_token"
+```
+
+### **Benefits of Hardcoded Configuration**
+- **Security**: API key not exposed in app code
+- **Simplicity**: No configuration required from developers
+- **Consistency**: Same endpoint for all apps using the library
+- **Maintenance**: Easy to update across all deployments
+
+### **Request Headers**
+All requests include these headers automatically:
+```
+Authorization: Bearer rahul_analytics_key_2024_secure_token
+X-Analytics-SDK: RahulAnalytics
+X-SDK-Version: 1.0.0
+X-Device-Version: [Android Version]
+X-Device-Model: [Device Model]
+X-Device-Manufacturer: [Manufacturer]
+X-Device-OS-Version: [SDK Version]
+```
 
 ## 🔄 Data Flow
 
@@ -282,6 +320,7 @@ Event Logged
 
 ### 2. **Network Optimization**
 - **Batch Requests**: Multiple events per API call
+- **Header-Based Device Info**: Device info sent in headers, not with each event
 - **Compression**: Gson serialization
 - **Timeout Handling**: Configurable timeouts
 
