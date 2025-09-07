@@ -2,7 +2,11 @@
 
 A comprehensive Android analytics library with WorkManager integration for reliable background syncing of analytics events.
 
-> 📖 **For detailed system design and architecture information, see [SYSTEM_DESIGN.md](SYSTEM_DESIGN.md)**
+## 📚 Documentation
+
+- **[SYSTEM_DESIGN.md](SYSTEM_DESIGN.md)** - Detailed system design, architecture, and component interactions
+- **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** - Comprehensive project overview and quick start guide
+- **[README.md](README.md)** - This file - Basic usage and setup
 
 ## Features
 
@@ -117,11 +121,39 @@ AnalyticImp.logEvent(
 
 ### Data Flow
 
-1. Events are logged via `AnalyticImp.logEvent()`
-2. Events are queued in `QueueManager` and stored locally
-3. **When app is running**: Events sent immediately via API when batch size is reached
-4. **When app is not running**: WorkManager periodically syncs events to the server
-5. Successfully sent events are removed from local storage
+```
+1. App Start
+   └── ContentProvider.onCreate()
+       └── AnalyticsInitProvider
+           └── Auto-Initialize Analytics
+               └── Analytics Ready
+
+2. User calls AnalyticImp.logEvent()
+   └── Event Created
+       └── QueueManager.enqueue()
+           └── StorageManager.persistEvents()
+               └── Stored in Room Database
+
+3. Batch Size Check
+   ├── Batch Size Reached?
+   │   ├── Yes → QueueManager.flush()
+   │   │   └── NetworkManager.sendEvents()
+   │   │       ├── Success → Remove from Database
+   │   │       └── Failure → Keep in Database
+   │   └── No → Wait for more events
+
+4. Background Sync (Periodic)
+   └── WorkManager Triggers
+       └── AnalyticsSyncWorker.doWork()
+           └── Retry Failed Events
+```
+
+**Key Points:**
+1. **Auto-Initialization**: ContentProvider sets up everything automatically
+2. **Dual Storage**: Events stored locally AND queued for processing
+3. **Immediate Sync**: When app is running and batch is full
+4. **Background Sync**: WorkManager handles failed/queued events
+5. **No Data Loss**: Events always stored locally first
 
 ### WorkManager Integration
 

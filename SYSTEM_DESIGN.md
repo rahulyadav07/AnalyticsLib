@@ -53,18 +53,20 @@ The Analytics Library is a comprehensive Android analytics solution that provide
 
 ## 🚀 Initialization Flow
 
+> **Note**: The diagrams below use Mermaid syntax. If they don't render properly in your viewer, refer to the text descriptions that follow each diagram.
+
 ### 1. ContentProvider Auto-Initialization
 ```mermaid
 graph TD
-    A[App Starts] --> B[ContentProvider.onCreate()]
-    B --> C[AnalyticsInitProvider.onCreate()]
-    C --> D[Create AnalyticsConfig]
-    D --> E[AnalyticImp.init(context, config)]
-    E --> F[Initialize Components]
-    F --> G[Analytics Ready]
+    A["App Starts"] --> B["ContentProvider.onCreate()"]
+    B --> C["AnalyticsInitProvider.onCreate()"]
+    C --> D["Create AnalyticsConfig"]
+    D --> E["AnalyticImp.init(context, config)"]
+    E --> F["Initialize Components"]
+    F --> G["Analytics Ready"]
     
-    H[MainActivity.onCreate()] --> I[AnalyticImp.init("api-key")]
-    I --> J[Start WorkManager Periodic Sync]
+    H["MainActivity.onCreate()"] --> I["AnalyticImp.init('api-key')"]
+    I --> J["Start WorkManager Periodic Sync"]
 ```
 
 ### 2. Component Initialization Sequence
@@ -174,29 +176,29 @@ graph TD
 ### Event Logging Flow
 ```mermaid
 graph TD
-    A[App calls AnalyticImp.logEvent()] --> B[Create AnalyticsEvent]
-    B --> C[QueueManager.enqueue()]
-    C --> D[Store in Room Database]
-    D --> E{Batch Size Reached?}
-    E -->|Yes| F[QueueManager.flush()]
-    E -->|No| G[Wait for more events]
-    F --> H[NetworkManager.sendEvents()]
-    H --> I{Success?}
-    I -->|Yes| J[Remove from Database]
-    I -->|No| K[Keep in Database]
-    K --> L[WorkManager will retry]
+    A["App calls AnalyticImp.logEvent()"] --> B["Create AnalyticsEvent"]
+    B --> C["QueueManager.enqueue()"]
+    C --> D["Store in Room Database"]
+    D --> E{"Batch Size Reached?"}
+    E -->|Yes| F["QueueManager.flush()"]
+    E -->|No| G["Wait for more events"]
+    F --> H["NetworkManager.sendEvents()"]
+    H --> I{"Success?"}
+    I -->|Yes| J["Remove from Database"]
+    I -->|No| K["Keep in Database"]
+    K --> L["WorkManager will retry"]
 ```
 
 ### Background Sync Flow
 ```mermaid
 graph TD
-    A[WorkManager Triggers] --> B[AnalyticsSyncWorker.doWork()]
-    B --> C[StorageManager.getPendingEvents()]
-    C --> D[NetworkManager.sendEvents()]
-    D --> E{Success?}
-    E -->|Yes| F[StorageManager.removeEvents()]
-    E -->|No| G[Result.retry()]
-    F --> H[Result.success()]
+    A["WorkManager Triggers"] --> B["AnalyticsSyncWorker.doWork()"]
+    B --> C["StorageManager.getPendingEvents()"]
+    C --> D["NetworkManager.sendEvents()"]
+    D --> E{"Success?"}
+    E -->|Yes| F["StorageManager.removeEvents()"]
+    E -->|No| G["Result.retry()"]
+    F --> H["Result.success()"]
 ```
 
 ## 📡 Communication Patterns
