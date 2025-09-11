@@ -14,6 +14,9 @@
       <SelectionState runConfigName="custombtroadcast">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="imagedownlinglib">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
