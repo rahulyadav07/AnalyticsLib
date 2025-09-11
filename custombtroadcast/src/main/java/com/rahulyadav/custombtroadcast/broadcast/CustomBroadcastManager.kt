@@ -11,6 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.rahulyadav.custombtroadcast.receivers.DataSyncReceiver
 import com.rahulyadav.custombtroadcast.receivers.SystemEventReceiver
+import com.rahulyadav.custombtroadcast.receivers.UiUpdateReceiver
 import com.rahulyadav.custombtroadcast.receivers.UserActionReceiver
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -34,7 +35,7 @@ class CustomBroadcastManager private constructor(private val application: Applic
         @Volatile
         private var INSTANCE: CustomBroadcastManager? = null
         
-        fun getInstance(application: Application): CustomBroadcastManager {
+        fun qgetInstance(application: Application): CustomBroadcastManager {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: CustomBroadcastManager(application).also { INSTANCE = it }
             }
@@ -94,6 +95,10 @@ class CustomBroadcastManager private constructor(private val application: Applic
         // Register data sync receiver
         val dataSyncReceiver = DataSyncReceiver()
         registerReceiver("data_sync", dataSyncReceiver)
+        
+        // Register UI update receiver
+        val uiReceiver = UiUpdateReceiver()
+        registerReceiver("ui_updates", uiReceiver)
         
         Log.i(TAG, "Global receivers registered")
     }
@@ -377,6 +382,14 @@ class CustomBroadcastManager private constructor(private val application: Applic
      */
     fun getReceiver(id: String): CustomBroadcastReceiver? {
         return receiverIds[id]
+    }
+    
+    /**
+     * Get the UI update receiver
+     * @return UiUpdateReceiver or null if not found
+     */
+    fun getUiUpdateReceiver(): UiUpdateReceiver? {
+        return receiverIds["ui_updates"] as? UiUpdateReceiver
     }
     
     /**

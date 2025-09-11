@@ -134,19 +134,21 @@ val loginData = Bundle().apply {
 broadcastManager.sendCustomBroadcast(UserActionReceiver.ACTION_USER_LOGIN, loginData)
 ```
 
-### Activity-Specific Receivers
+### UI Update Receivers
 ```kotlin
-val activityReceiver = object : BaseCustomBroadcastReceiver() {
-    override fun getInterestedActions(): List<String> {
-        return listOf(UserActionReceiver.ACTION_USER_LOGIN)
+// UI receiver is automatically registered globally
+val uiReceiver = broadcastManager.getUiUpdateReceiver()
+uiReceiver?.setUiCallback(object : UiUpdateReceiver.UiUpdateCallback {
+    override fun onLogMessage(message: String, logType: String) {
+        runOnUiThread {
+            updateLog("[$logType] $message")
+        }
     }
     
-    override fun onCustomBroadcastReceived(context: Context, action: String, data: Bundle?) {
-        // Handle broadcast in activity context
-        updateUI(data)
+    override fun onUiUpdateRequest(data: Bundle?) {
+        // Handle UI update request
     }
-}
-broadcastManager.registerActivityReceiver(this, activityReceiver)
+})
 ```
 
 ## System Design Benefits

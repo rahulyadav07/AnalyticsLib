@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.rahulyadav.custombtroadcast.broadcast.CustomBroadcastManager
 import com.rahulyadav.custombtroadcast.receivers.DataSyncReceiver
 import com.rahulyadav.custombtroadcast.receivers.SystemEventReceiver
+import com.rahulyadav.custombtroadcast.receivers.UiUpdateReceiver
 import com.rahulyadav.custombtroadcast.receivers.UserActionReceiver
 
 /**
@@ -30,7 +31,6 @@ class MainActivity : AppCompatActivity() {
         
         initializeBroadcastSystem()
         setupUI()
-        setupActivityReceiver()
     }
     
     /**
@@ -38,6 +38,22 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initializeBroadcastSystem() {
         broadcastManager = CustomBroadcastManager.getInstance(application)
+        
+        // Set up UI callback for the global UI receiver
+        val uiReceiver = broadcastManager.getUiUpdateReceiver()
+        uiReceiver?.setUiCallback(object : UiUpdateReceiver.UiUpdateCallback {
+            override fun onLogMessage(message: String, logType: String) {
+                runOnUiThread {
+                    updateLog("[$logType] $message")
+                }
+            }
+            
+            override fun onUiUpdateRequest(data: Bundle?) {
+                runOnUiThread {
+                    updateLog("UI Update Request received")
+                }
+            }
+        })
         
         Log.i(TAG, "Broadcast system initialized")
     }
@@ -107,46 +123,6 @@ class MainActivity : AppCompatActivity() {
         updateLog("App started - Custom Broadcast System Ready")
     }
     
-    /**
-     * Setup activity-specific receiver
-     */
-    private fun setupActivityReceiver() {
-        val activityReceiver = object : com.rahulyadav.custombtroadcast.broadcast.BaseCustomBroadcastReceiver() {
-            override fun getInterestedActions(): List<String> {
-                return listOf(
-                    UserActionReceiver.ACTION_USER_LOGIN,
-                    UserActionReceiver.ACTION_USER_LOGOUT,
-                    SystemEventReceiver.ACTION_APP_FOREGROUND,
-                    SystemEventReceiver.ACTION_APP_BACKGROUND
-                )
-            }
-            
-            override fun getPriority(): Int = 2000 // Very high priority for UI updates
-            
-            override fun onCustomBroadcastReceived(context: Context, action: String?, data: Bundle?) {
-                runOnUiThread {
-                    when (action) {
-                        UserActionReceiver.ACTION_USER_LOGIN -> {
-                            val userId = data?.getString(UserActionReceiver.KEY_USER_ID) ?: "unknown"
-                            updateLog("UI: User logged in - $userId")
-                        }
-                        UserActionReceiver.ACTION_USER_LOGOUT -> {
-                            val userId = data?.getString(UserActionReceiver.KEY_USER_ID) ?: "unknown"
-                            updateLog("UI: User logged out - $userId")
-                        }
-                        SystemEventReceiver.ACTION_APP_FOREGROUND -> {
-                            updateLog("UI: App moved to foreground")
-                        }
-                        SystemEventReceiver.ACTION_APP_BACKGROUND -> {
-                            updateLog("UI: App moved to background")
-                        }
-                    }
-                }
-            }
-        }
-        
-        broadcastManager.registerActivityReceiver(this, activityReceiver)
-    }
     
     // User Action Broadcast Methods
     private fun sendUserLoginBroadcast() {
