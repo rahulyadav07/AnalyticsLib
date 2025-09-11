@@ -4,9 +4,46 @@ A comprehensive Android analytics library with WorkManager integration for relia
 
 ## 📚 Documentation
 
+### Main Project Documentation
 - **[SYSTEM_DESIGN.md](SYSTEM_DESIGN.md)** - Detailed system design, architecture, and component interactions
 - **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** - Comprehensive project overview and quick start guide
 - **[README.md](README.md)** - This file - Basic usage and setup
+
+### Library-Specific Documentation
+- **[Image Loading Library](imagedownlinglib/README.md)** - Clean, efficient image downloading library following SOLID principles
+- **[Custom Broadcast System](custombtroadcast/README.md)** - Comprehensive custom broadcast receiver system with priority-based handling
+- **[Caching Library](cachinglib/)** - Advanced caching mechanisms (documentation coming soon)
+- **[Analytics Library](analytics/)** - Core analytics implementation (documentation in main README)
+
+## 🏗️ Project Structure
+
+This project contains multiple Android libraries, each designed with clean architecture and SOLID principles:
+
+### 📊 Analytics Library (`analytics/`)
+- **Purpose**: Event logging and analytics with WorkManager integration
+- **Features**: Background syncing, local storage, batch processing
+- **Key Components**: QueueManager, StorageManager, NetworkManager, WorkManager integration
+
+### 🖼️ Image Loading Library (`imagedownlinglib/`)
+- **Purpose**: Efficient image downloading and caching
+- **Features**: Memory/disk caching, async loading, error handling
+- **Key Components**: ImageLoader, ImageCache, NetworkClient, ImageDecoder
+- **Design Patterns**: Strategy, Builder, Factory, Facade patterns
+
+### 📡 Custom Broadcast System (`custombtroadcast/`)
+- **Purpose**: Enhanced broadcast receiver system
+- **Features**: Priority-based handling, lifecycle management, type-safe broadcasts
+- **Key Components**: CustomBroadcastManager, BaseCustomBroadcastReceiver
+- **Design Patterns**: Singleton, Observer, Strategy patterns
+
+### 💾 Caching Library (`cachinglib/`)
+- **Purpose**: Advanced caching mechanisms
+- **Features**: Multi-level caching, cache strategies, performance optimization
+- **Status**: In development
+
+### 📱 Demo App (`app/`)
+- **Purpose**: Demonstrates usage of all libraries
+- **Features**: Integration examples, testing scenarios, UI demonstrations
 
 ## Features
 
