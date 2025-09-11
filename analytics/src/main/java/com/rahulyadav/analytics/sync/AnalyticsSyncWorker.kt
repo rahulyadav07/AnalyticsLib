@@ -17,7 +17,7 @@ class AnalyticsSyncWorker(
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
-    private val storageManager: StorageManager = StorageManagerImp(context)
+    private val storageManager: StorageManager = StorageManagerImp(context, createDefaultConfig())
     private val analyticsProvider: AnalyticsProvider = createAnalyticsProvider()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
@@ -46,5 +46,11 @@ class AnalyticsSyncWorker(
     private fun createAnalyticsProvider(): AnalyticsProvider {
         // API key and endpoint are hardcoded in RetrofitAnalyticProvider
         return RetrofitAnalyticProvider()
+    }
+    
+    private fun createDefaultConfig(): com.rahulyadav.analytics.analytics.AnalyticsConfig {
+        return com.rahulyadav.analytics.analytics.AnalyticsConfig(
+            maxDatabaseSize = 10000  // Default database size limit
+        )
     }
 }

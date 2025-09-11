@@ -19,7 +19,7 @@ class QueueManagerImpl(private val context: Context,
 
     private val eventQueue = ConcurrentLinkedQueue<AnalyticsEvent>()
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val storageManager: StorageManager = StorageManagerImp(context)
+    private val storageManager: StorageManager = StorageManagerImp(context, config)
     private val networkManager: NetworkManager = NetworkManagerImp(config)
 
 

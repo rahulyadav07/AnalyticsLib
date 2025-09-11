@@ -19,7 +19,8 @@ class AnalyticsInitProvider : ContentProvider() {
         val config = AnalyticsConfig(
             batchSize = 10,
             maxQueueSize = 10,
-            maxRetryAttempts = 2
+            maxRetryAttempts = 2,
+            maxDatabaseSize = 10000  // Maximum events in database (FIFO eviction)
         )
         AnalyticImp.init(context!!, config)
     }

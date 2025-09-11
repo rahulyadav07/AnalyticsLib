@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.rahulyadav.analytics.analytics.AnalyticsEvent
 
-class StorageManagerImp(val context: Context):StorageManager {
+class StorageManagerImp(val context: Context, private val config: com.rahulyadav.analytics.analytics.AnalyticsConfig):StorageManager {
 
         private val database = Room.databaseBuilder(
             context,
@@ -13,7 +13,22 @@ class StorageManagerImp(val context: Context):StorageManager {
         ).build()
 
     override suspend fun persistEvents(events: List<AnalyticsEvent>) {
+        // Insert new events
         database.eventsDao().insertAll(events.map { it.toEntity() })
+        
+        // Apply eviction strategy if database is over limit
+        evictOldEventsIfNeeded()
+    }
+    
+    private suspend fun evictOldEventsIfNeeded() {
+        val currentCount = database.eventsDao().getCount()
+        if (currentCount > config.maxDatabaseSize) {
+            val eventsToDelete = currentCount - config.maxDatabaseSize
+            println("Analytics: Database has $currentCount events, evicting $eventsToDelete oldest events")
+            
+            // Delete oldest events (FIFO - First In, First Out)
+            database.eventsDao().deleteOldestEvents(eventsToDelete)
+        }
     }
 
     override suspend fun loadPersistedEvents(): List<AnalyticsEvent> {

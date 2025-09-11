@@ -31,4 +31,10 @@ interface AnalyticsEventDao {
 
     @Query("SELECT COUNT(*) FROM analytics_events WHERE isSent = 0")
     suspend fun getPendingEventsCount(): Int
+    
+    @Query("SELECT COUNT(*) FROM analytics_events")
+    suspend fun getCount(): Int
+    
+    @Query("DELETE FROM analytics_events WHERE id IN (SELECT id FROM analytics_events ORDER BY timestamp ASC LIMIT :limit)")
+    suspend fun deleteOldestEvents(limit: Int)
 }

@@ -22,3 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "AnalyticsLib"
 include(":app")
 include(":analytics")
+include(":cachinglib")
+include(":custombtroadcast")
