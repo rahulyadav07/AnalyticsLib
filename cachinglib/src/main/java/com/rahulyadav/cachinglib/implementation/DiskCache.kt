@@ -1,12 +1,12 @@
-package com.rahulyadav.imagedownlinglib.cache
+package com.rahulyadav.cachinglib.implementation
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import com.rahulyadav.cachinglib.strategy.Cache
+import com.rahulyadav.cachinglib.strategy.Serializer
+import com.rahulyadav.cachinglib.core.CacheException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.security.MessageDigest
 
@@ -15,11 +15,12 @@ import java.security.MessageDigest
  * Follows Single Responsibility Principle - only handles disk caching.
  * Thread-safe implementation using coroutines.
  */
-class DiskCache(
+class DiskCache<T>(
     private val context: Context,
-    private val maxSize: Long,
-    private val cacheDir: String = "image_cache"
-) : ImageCache {
+    private val serializer: Serializer<T>,
+    private val maxSize: Int = 1000,
+    private val cacheDir: String = "cache"
+) : Cache<T> {
     
     private val cacheDirectory: File by lazy {
         File(context.cacheDir, cacheDir).apply {
@@ -29,11 +30,12 @@ class DiskCache(
         }
     }
     
-    override suspend fun get(key: String): Bitmap? = withContext(Dispatchers.IO) {
+    override suspend fun get(key: String): T? = withContext(Dispatchers.IO) {
         try {
             val file = getCacheFile(key)
             if (file.exists() && file.length() > 0) {
-                BitmapFactory.decodeFile(file.absolutePath)
+                val data = file.readText()
+                serializer.deserialize(data, Any::class.java as Class<T>)
             } else {
                 null
             }
@@ -42,17 +44,18 @@ class DiskCache(
         }
     }
     
-    override suspend fun put(key: String, bitmap: Bitmap) = withContext(Dispatchers.IO) {
+    override suspend fun put(key: String, value: T) = withContext(Dispatchers.IO) {
         try {
             val file = getCacheFile(key)
-            FileOutputStream(file).use { fos ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            }
+            val data = serializer.serialize(value)
+            file.writeText(data)
             
             // Clean up old files if cache is too large
             cleanupIfNeeded()
         } catch (e: IOException) {
-            // Log error or handle silently
+            throw CacheException.FileSystemException("Failed to write cache file: ${e.message}", e)
+        } catch (e: Exception) {
+            throw CacheException.SerializationException("Failed to serialize value: ${e.message}", e)
         }
     }
     
@@ -62,7 +65,6 @@ class DiskCache(
         } catch (e: Exception) {
             // Log error or handle silently
         }
-        Unit
     }
     
     override suspend fun clear() = withContext(Dispatchers.IO) {
@@ -71,18 +73,25 @@ class DiskCache(
         } catch (e: Exception) {
             // Log error or handle silently
         }
-        Unit
     }
     
-    override suspend fun size(): Long = withContext(Dispatchers.IO) {
+    override suspend fun contains(key: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            cacheDirectory.listFiles()?.sumOf { it.length() } ?: 0L
+            getCacheFile(key).exists()
         } catch (e: Exception) {
-            0L
+            false
         }
     }
     
-    override fun maxSize(): Long = maxSize
+    override suspend fun size(): Int = withContext(Dispatchers.IO) {
+        try {
+            cacheDirectory.listFiles()?.size ?: 0
+        } catch (e: Exception) {
+            0
+        }
+    }
+    
+    override fun maxSize(): Int = maxSize
     
     private fun getCacheFile(key: String): File {
         val hash = hashKey(key)
@@ -100,13 +109,10 @@ class DiskCache(
         if (currentSize > maxSize) {
             val files = cacheDirectory.listFiles()?.sortedBy { it.lastModified() } ?: return@withContext
             
-            var sizeToRemove = currentSize - (maxSize * 0.8).toLong() // Remove 20% of max size
-            var removedSize = 0L
+            val filesToRemove = currentSize - (maxSize * 0.8).toInt() // Remove 20% of max size
             
-            for (file in files) {
-                if (removedSize >= sizeToRemove) break
-                removedSize += file.length()
-                file.delete()
+            for (i in 0 until minOf(filesToRemove, files.size)) {
+                files[i].delete()
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.rahulyadav.imagedownlinglib.decoder
+package com.rahulyadav.imagedownlinglib.strategy
 
 import android.graphics.Bitmap
 

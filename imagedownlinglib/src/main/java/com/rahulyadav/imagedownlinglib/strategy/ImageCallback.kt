@@ -1,4 +1,6 @@
-package com.rahulyadav.imagedownlinglib.core
+package com.rahulyadav.imagedownlinglib.strategy
+
+import com.rahulyadav.imagedownlinglib.core.ImageResult
 
 /**
  * Callback interface for image loading operations.

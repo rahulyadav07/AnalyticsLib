@@ -1,6 +1,7 @@
-package com.rahulyadav.imagedownlinglib.cache
+package com.rahulyadav.imagedownlinglib.implementation.cache
 
 import android.graphics.Bitmap
+import com.rahulyadav.imagedownlinglib.strategy.ImageCache
 
 /**
  * No-op cache implementation.

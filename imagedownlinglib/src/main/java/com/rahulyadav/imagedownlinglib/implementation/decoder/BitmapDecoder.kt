@@ -1,10 +1,11 @@
-package com.rahulyadav.imagedownlinglib.decoder
+package com.rahulyadav.imagedownlinglib.implementation.decoder
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.rahulyadav.imagedownlinglib.strategy.ImageDecoder
 
 /**
  * Bitmap decoder implementation using Android's BitmapFactory.

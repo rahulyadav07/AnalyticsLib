@@ -2,6 +2,7 @@ package com.rahulyadav.imagedownlinglib.core
 
 import android.graphics.Bitmap
 import android.widget.ImageView
+import com.rahulyadav.imagedownlinglib.strategy.ImageCallback
 
 /**
  * Represents an image loading request.

@@ -1,9 +1,10 @@
-package com.rahulyadav.imagedownlinglib.cache
+package com.rahulyadav.imagedownlinglib.implementation.cache
 
 import android.graphics.Bitmap
 import android.util.LruCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.rahulyadav.imagedownlinglib.strategy.ImageCache
 
 /**
  * Memory cache implementation using LruCache.
@@ -12,8 +13,8 @@ import kotlinx.coroutines.withContext
  */
 class MemoryCache(maxSize: Long) : ImageCache {
     
-    private val cache = LruCache<String, Bitmap>((maxSize / 1024).toInt()) {
-        _, bitmap -> bitmap.byteCount
+    private val cache = LruCache<String, Bitmap>((maxSize / 1024).toInt()){ _, bitmap ->
+        bitmap.byteCount
     }
     
     override suspend fun get(key: String): Bitmap? = withContext(Dispatchers.IO) {

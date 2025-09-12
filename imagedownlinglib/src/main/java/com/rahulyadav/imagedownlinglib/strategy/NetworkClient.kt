@@ -1,4 +1,4 @@
-package com.rahulyadav.imagedownlinglib.network
+package com.rahulyadav.imagedownlinglib.strategy
 
 /**
  * Interface for network operations.

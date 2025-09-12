@@ -2,10 +2,13 @@ package com.rahulyadav.imagedownlinglib.core
 
 import android.graphics.Bitmap
 import android.widget.ImageView
-import com.rahulyadav.imagedownlinglib.cache.ImageCache
-import com.rahulyadav.imagedownlinglib.network.NetworkClient
-import com.rahulyadav.imagedownlinglib.decoder.ImageDecoder
+import com.rahulyadav.imagedownlinglib.strategy.ImageCache
+import com.rahulyadav.imagedownlinglib.strategy.NetworkClient
+import com.rahulyadav.imagedownlinglib.strategy.ImageDecoder
 import com.rahulyadav.imagedownlinglib.config.ImageLoaderConfig
+import com.rahulyadav.imagedownlinglib.strategy.CacheStats
+import com.rahulyadav.imagedownlinglib.strategy.ImageCallback
+import com.rahulyadav.imagedownlinglib.strategy.ImageLoader
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

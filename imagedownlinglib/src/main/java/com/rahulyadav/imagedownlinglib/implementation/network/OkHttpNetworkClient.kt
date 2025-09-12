@@ -1,4 +1,4 @@
-package com.rahulyadav.imagedownlinglib.network
+package com.rahulyadav.imagedownlinglib.implementation.network
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -7,6 +7,7 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import com.rahulyadav.imagedownlinglib.strategy.NetworkClient
 
 /**
  * OkHttp implementation of NetworkClient.

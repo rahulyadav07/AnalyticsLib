@@ -1,14 +1,14 @@
-# Simple Image Loading Library
+# Simple Cache Library
 
-A clean, efficient, and super simple image loading library for Android. Just load, placeholder, and resize - that's it!
+A clean, efficient, and super simple caching library for Android. Just get, put, remove, and clear - that's it!
 
 ## Features
 
-- 🚀 **Super Simple API**: Just 3 methods - `load()`, `placeholder()`, `resize()`, `into()`
-- 💾 **Smart Caching**: Automatic memory and disk caching
+- 🚀 **Super Simple API**: Just 4 methods - `get()`, `put()`, `remove()`, `clear()`
+- 💾 **Smart Caching**: Automatic memory and disk caching with LRU eviction
 - 🔄 **Async Operations**: Built with Kotlin Coroutines
 - 🎯 **Clean Architecture**: 4-layer structure following SOLID principles
-- 📱 **Memory Efficient**: Automatic image resizing and memory management
+- 📱 **Memory Efficient**: Automatic cache size management
 - 🧪 **Easy to Understand**: Perfect for interviews and learning
 
 ## Quick Start
@@ -22,7 +22,7 @@ class MyApplication : Application() {
         super.onCreate()
         
         // Initialize once - that's it!
-        ImageLoader.initialize(this)
+        Cache.initialize(this)
     }
 }
 ```
@@ -30,29 +30,42 @@ class MyApplication : Application() {
 ### 2. Basic Usage
 
 ```kotlin
-// Simple image loading
-ImageLoader.load("https://example.com/image.jpg")
-    .into(imageView)
+// Store data
+Cache.put("user_name", "John Doe")
+Cache.put("user_age", 25)
 
-// With placeholder
-ImageLoader.load("https://example.com/image.jpg")
-    .placeholder(R.drawable.placeholder)
-    .into(imageView)
+// Retrieve data
+val name: String? = Cache.get("user_name")
+val age: Int? = Cache.get("user_age")
 
-// With resizing
-ImageLoader.load("https://example.com/image.jpg")
-    .placeholder(R.drawable.placeholder)
-    .resize(200, 200)
-    .into(imageView)
+// Remove data
+Cache.remove("user_name")
+
+// Clear all caches
+Cache.clear()
 ```
 
-### 3. That's It!
+### 3. Object Caching
+
+```kotlin
+data class User(val id: Int, val name: String, val email: String)
+
+val user = User(1, "Jane Doe", "jane@example.com")
+
+// Store object
+Cache.put("user_1", user)
+
+// Retrieve object
+val cachedUser: User? = Cache.get("user_1")
+```
+
+### 4. That's It!
 
 The library is super simple - just 4 methods:
-- `load(url)` - Start loading an image
-- `placeholder(resourceId)` - Set placeholder image (optional)
-- `resize(width, height)` - Resize the image (optional)
-- `into(imageView)` - Load into ImageView (required)
+- `get(key)` - Get value from cache
+- `put(key, value)` - Store value in cache
+- `remove(key)` - Remove value from cache
+- `clear()` - Clear all caches
 
 ## Package Structure
 
@@ -60,33 +73,30 @@ The library follows a clean 4-layer architecture:
 
 ```
 📁 api/                    # Public API Layer
-   ├── ImageLoader.kt      # Main simple API
+   ├── Cache.kt            # Main simple API
    └── ExampleUsage.kt     # Simple examples
 
 📁 core/                   # Core Business Logic
-   ├── ImageLoaderImpl.kt  # Main implementation
-   ├── ImageRequest.kt     # Request model
-   ├── ImageResult.kt      # Result model
-   └── ImageLoaderException.kt
+   ├── CacheManager.kt     # Main implementation
+   ├── CacheResult.kt      # Result model
+   └── CacheException.kt   # Exception model
 
 📁 strategy/               # Strategy Interfaces
-   ├── ImageLoader.kt      # Main interface
-   ├── ImageCache.kt       # Cache strategy
-   ├── NetworkClient.kt    # Network strategy
-   ├── ImageDecoder.kt     # Decode strategy
-   └── ImageCallback.kt    # Callback interface
+   ├── Cache.kt            # Cache strategy
+   └── Serializer.kt       # Serialization strategy
 
 📁 implementation/         # Concrete Implementations
-   ├── cache/              # Cache implementations
-   ├── network/            # Network implementations
-   └── decoder/            # Decoder implementations
+   ├── MemoryCache.kt      # Memory cache (LruCache)
+   ├── DiskCache.kt        # Disk cache (FileSystem)
+   ├── GsonSerializer.kt   # JSON serialization
+   └── NoCache.kt          # Null object pattern
 
 📁 config/                 # Configuration
-   └── ImageLoaderConfig.kt
+   └── CacheConfig.kt      # Builder pattern config
 
 📁 utils/                  # Utilities
    ├── Logger.kt
-   └── UrlValidator.kt
+   └── KeyValidator.kt
 ```
 
 ## 🏗️ Architecture Overview
@@ -95,42 +105,42 @@ The library follows a clean 4-layer architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           Simple Image Loading Library                          │
+│                           Simple Cache Library                                  │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐    │
 │  │                        Public API Layer                                │    │
-│  │  ┌─────────────────┐  ┌─────────────────────────────────────────────┐ │    │
-│  │  │   ImageLoader   │  │        ImageRequestBuilder                  │ │    │
-│  │  │   (Facade)      │  │        (Builder Pattern)                    │ │    │
-│  │  └─────────────────┘  └─────────────────────────────────────────────┘ │    │
+│  │  ┌─────────────────────────────────────────────────────────────────┐   │    │
+│  │  │                    Cache (Facade)                              │   │    │
+│  │  │              get(), put(), remove(), clear()                   │   │    │
+│  │  └─────────────────────────────────────────────────────────────────┘   │    │
 │  └─────────────────────────────────────────────────────────────────────────┘    │
 │                                    │                                            │
 │  ┌─────────────────────────────────▼─────────────────────────────────────────┐  │
 │  │                      Core Business Logic Layer                          │  │
 │  │  ┌─────────────────────────────────────────────────────────────────────┐ │  │
-│  │  │                    ImageLoaderImpl                                 │ │  │
-│  │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │ │  │
-│  │  │  │Request      │  │Cache        │  │Network      │  │Image        │ │ │  │
-│  │  │  │Management   │  │Orchestration│  │Orchestration│  │Processing   │ │ │  │
-│  │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘ │ │  │
+│  │  │                    CacheManager                                   │ │  │
+│  │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐   │ │  │
+│  │  │  │Memory       │  │Disk         │  │Serialization            │   │ │  │
+│  │  │  │Orchestration│  │Orchestration│  │Management               │   │ │  │
+│  │  │  └─────────────┘  └─────────────┘  └─────────────────────────┘   │ │  │
 │  │  └─────────────────────────────────────────────────────────────────────┘ │  │
 │  └─────────────────────────────────────────────────────────────────────────┘  │
 │                                    │                                            │
 │  ┌─────────────────────────────────▼─────────────────────────────────────────┐  │
 │  │                        Strategy Layer (Interfaces)                      │  │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │  │
-│  │  │ImageCache   │  │NetworkClient│  │ImageDecoder │  │ImageCallback    │ │  │
-│  │  │(Strategy)   │  │(Strategy)   │  │(Strategy)   │  │(Observer)       │ │  │
-│  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘ │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐         │  │
+│  │  │Cache        │  │Serializer   │  │KeyValidator             │         │  │
+│  │  │(Strategy)   │  │(Strategy)   │  │(Utility)                │         │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────────────────┘         │  │
 │  └─────────────────────────────────────────────────────────────────────────┘  │
 │                                    │                                            │
 │  ┌─────────────────────────────────▼─────────────────────────────────────────┐  │
 │  │                      Implementation Layer                                │  │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐ │  │
-│  │  │MemoryCache  │  │DiskCache    │  │OkHttpClient │  │BitmapDecoder    │ │  │
-│  │  │(LruCache)   │  │(FileSystem) │  │(HTTP)       │  │(BitmapFactory)  │ │  │
-│  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘ │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐         │  │
+│  │  │MemoryCache  │  │DiskCache    │  │GsonSerializer           │         │  │
+│  │  │(LruCache)   │  │(FileSystem) │  │(JSON)                   │         │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────────────────┘         │  │
 │  └─────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -139,41 +149,42 @@ The library follows a clean 4-layer architecture:
 ### Simple Flow
 
 ```
-1. User calls ImageLoader.load(url)
+1. User calls Cache.put(key, value)
    ↓
-2. ImageLoaderImpl processes request
+2. CacheManager processes request
    ↓
-3. Check Memory Cache → Disk Cache → Network Download
+3. Store in Memory Cache → Store in Disk Cache
    ↓
-4. Decode and resize image
-   ↓
-5. Store in caches and display in ImageView
+4. Return success result
 ```
 
 ### Cache Strategy
 
 ```
-Memory Cache (Fast) → Disk Cache (Medium) → Network Download (Slow)
-       ↓                    ↓                        ↓
-   Return Bitmap      Store in Memory +         Store in Both +
-                      Return Bitmap             Return Bitmap
+Memory Cache (Fast) → Disk Cache (Persistent)
+       ↓                    ↓
+   Return Value        Store for later
 ```
 
 ## Key Design Patterns
 
 ### 1. **Facade Pattern**
-- `ImageLoader` provides a simple interface to complex subsystems
-- Hides the complexity of caching, networking, and image processing
+- `Cache` provides a simple interface to complex caching subsystems
+- Hides the complexity of memory/disk caching and serialization
 
-### 2. **Builder Pattern**
-- `ImageRequestBuilder` allows fluent API chaining
-- Easy to configure requests: `load().placeholder().resize().into()`
-
-### 3. **Strategy Pattern**
-- `ImageCache`, `NetworkClient`, `ImageDecoder` are strategies
+### 2. **Strategy Pattern**
+- `Cache`, `Serializer` are strategies
 - Easy to swap implementations (MemoryCache vs DiskCache vs NoCache)
 
-### 4. **SOLID Principles**
+### 3. **Builder Pattern**
+- `CacheConfig.Builder` allows flexible configuration
+- Easy to configure cache sizes and options
+
+### 4. **Null Object Pattern**
+- `NoCache` provides default behavior when caching is disabled
+- Prevents null checks and simplifies code
+
+### 5. **SOLID Principles**
 - **Single Responsibility**: Each class has one job
 - **Open/Closed**: Open for extension, closed for modification
 - **Liskov Substitution**: All implementations are interchangeable
@@ -196,9 +207,9 @@ Memory Cache (Fast) → Disk Cache (Medium) → Network Download (Slow)
 
 ### 💡 **Interview Talking Points**
 1. **SOLID Principles**: How each principle is applied
-2. **Design Patterns**: Facade, Builder, Strategy patterns
+2. **Design Patterns**: Facade, Strategy, Builder, Null Object patterns
 3. **Clean Architecture**: 4-layer separation of concerns
-4. **Performance**: Caching strategy and memory management
+4. **Performance**: LRU eviction and cache size management
 5. **Error Handling**: Comprehensive exception handling
 6. **Threading**: Coroutines and proper dispatcher usage
 

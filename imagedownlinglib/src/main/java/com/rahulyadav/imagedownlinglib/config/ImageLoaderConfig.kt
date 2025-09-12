@@ -1,14 +1,14 @@
 package com.rahulyadav.imagedownlinglib.config
 
 import android.content.Context
-import com.rahulyadav.imagedownlinglib.cache.ImageCache
-import com.rahulyadav.imagedownlinglib.cache.MemoryCache
-import com.rahulyadav.imagedownlinglib.cache.DiskCache
-import com.rahulyadav.imagedownlinglib.cache.NoCache
-import com.rahulyadav.imagedownlinglib.network.NetworkClient
-import com.rahulyadav.imagedownlinglib.network.OkHttpNetworkClient
-import com.rahulyadav.imagedownlinglib.decoder.ImageDecoder
-import com.rahulyadav.imagedownlinglib.decoder.BitmapDecoder
+import com.rahulyadav.imagedownlinglib.strategy.ImageCache
+import com.rahulyadav.imagedownlinglib.implementation.cache.MemoryCache
+import com.rahulyadav.imagedownlinglib.implementation.cache.DiskCache
+import com.rahulyadav.imagedownlinglib.implementation.cache.NoCache
+import com.rahulyadav.imagedownlinglib.strategy.NetworkClient
+import com.rahulyadav.imagedownlinglib.implementation.network.OkHttpNetworkClient
+import com.rahulyadav.imagedownlinglib.strategy.ImageDecoder
+import com.rahulyadav.imagedownlinglib.implementation.decoder.BitmapDecoder
 
 /**
  * Configuration class for ImageLoader.

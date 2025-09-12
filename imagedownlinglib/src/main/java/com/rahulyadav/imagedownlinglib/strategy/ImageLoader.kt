@@ -1,16 +1,16 @@
-package com.rahulyadav.imagedownlinglib.core
+package com.rahulyadav.imagedownlinglib.strategy
 
 import android.widget.ImageView
-import com.rahulyadav.imagedownlinglib.cache.ImageCache
-import com.rahulyadav.imagedownlinglib.network.NetworkClient
-import com.rahulyadav.imagedownlinglib.decoder.ImageDecoder
+import com.rahulyadav.imagedownlinglib.strategy.ImageCache
+import com.rahulyadav.imagedownlinglib.strategy.NetworkClient
+import com.rahulyadav.imagedownlinglib.strategy.ImageDecoder
 
 /**
  * Main interface for image loading operations.
  * Follows Facade pattern - provides a simple interface to complex subsystems.
  * Follows Dependency Inversion Principle - depends on abstractions, not concretions.
  */
-interface ImageLoader {
+interface  ImageLoader {
     
     /**
      * Load image from URL into ImageView
